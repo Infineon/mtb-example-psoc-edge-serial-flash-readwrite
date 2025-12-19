@@ -6,9 +6,13 @@ In addition, this code example README covers how to use the Serial Flash Discove
 
 This code example has a three project structure: CM33 secure, CM33 non-secure, and CM55 projects. All three projects are programmed to the external QSPI flash and executed in Execute in Place (XIP) mode. Extended boot launches the CM33 secure project from a fixed location in the external flash, which then configures the protection settings and launches the CM33 non-secure application. Additionally, CM33 non-secure application enables CM55 CPU and launches the CM55 application.
 
+> **Note:** This example performs SMIF read/write using the CM33 CPU while the CM55 CPU is put to DeepSleep. Both CM33 and CM55 CPUs execute code in place (XIP) from the external QSPI flash, and the SMIF driver routines run from SRAM as specified by the BSP’s default linker scripts.
+When any CPU configures the SMIF controller in MMIO (command) mode to access the external flash, XIP is temporarily suspended and the SMIF interface becomes exclusively owned by that CPU. During this period, no other CPU may fetch instructions via XIP or perform additional MMIO transactions to the same external flash. Any concurrent access from another CPU can cause bus contention and result in a bus fault.
+The application must enforce mutual exclusion across CPUs for external flash access and only one CPU may perform SMIF MMIO operations from the external QSPI flash at a time. In this example, mutual exclusion is ensured by putting the CM55 CPU in DeepSleep while the CM33 CPU performs SMIF MMIO operations.
+
 [View this README on GitHub.](https://github.com/Infineon/mtb-example-psoc-edge-serial-flash-readwrite)
 
-[Provide feedback on this code example.](https://cypress.co1.qualtrics.com/jfe/form/SV_1NTns53sK2yiljn?Q_EED=eyJVbmlxdWUgRG9jIElkIjoiQ0UyMzg1NjMiLCJTcGVjIE51bWJlciI6IjAwMi0zODU2MyIsIkRvYyBUaXRsZSI6IlBTT0MmdHJhZGU7IEVkZ2UgTUNVOiBTZXJpYWwgZmxhc2ggcmVhZCBhbmQgd3JpdGUiLCJyaWQiOiJoaW1hbnNodSBzaGVraGFyIiwiRG9jIHZlcnNpb24iOiIyLjEuMCIsIkRvYyBMYW5ndWFnZSI6IkVuZ2xpc2giLCJEb2MgRGl2aXNpb24iOiJNQ0QiLCJEb2MgQlUiOiJJQ1ciLCJEb2MgRmFtaWx5IjoiUFNPQyJ9)
+[Provide feedback on this code example.](https://cypress.co1.qualtrics.com/jfe/form/SV_1NTns53sK2yiljn?Q_EED=eyJVbmlxdWUgRG9jIElkIjoiQ0UyMzg1NjMiLCJTcGVjIE51bWJlciI6IjAwMi0zODU2MyIsIkRvYyBUaXRsZSI6IlBTT0MmdHJhZGU7IEVkZ2UgTUNVOiBTZXJpYWwgZmxhc2ggcmVhZCBhbmQgd3JpdGUiLCJyaWQiOiJoaW1hbnNodS5zaGVraGFyQGluZmluZW9uLmNvbSIsIkRvYyB2ZXJzaW9uIjoiMi4yLjAiLCJEb2MgTGFuZ3VhZ2UiOiJFbmdsaXNoIiwiRG9jIERpdmlzaW9uIjoiTUNEIiwiRG9jIEJVIjoiSUNXIiwiRG9jIEZhbWlseSI6IlBTT0MifQ==)
 
 See the [Design and implementation](docs/design_and_implementation.md) for the functional description of this code example.
 
@@ -102,6 +106,7 @@ Document title: *CE238563* – *PSOC&trade; Edge MCU: Serial flash read and writ
  1.x.0   | New code example <br> Early access release
  2.0.0   | GitHub release
  2.1.0   | Added KIT_PSE84_AI BSP support
+ 2.2.0   | Added a note clarifying that SMIF operations to the external QSPI flash must be mutually exclusive across CPUs 
 <br>
 
 
