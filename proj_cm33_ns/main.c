@@ -7,7 +7,7 @@
  * Related Document : See README.md
  *
  *******************************************************************************
- * (c) 2023-2025, Infineon Technologies AG, or an affiliate of Infineon
+ * (c) 2023-2026, Infineon Technologies AG, or an affiliate of Infineon
  * Technologies AG. All rights reserved.
  * This software, associated documentation and materials ("Software") is
  * owned by Infineon Technologies AG or one of its affiliates ("Infineon")
@@ -208,7 +208,17 @@ int main(void)
     printf("PSOC Edge MCU: Serial Flash Read and Write Test");
     printf("**************\r\n");
 
-    /* Set-up serial memory. */
+#if defined(CYBSP_OSPI_FLASH_SS_ENABLED)
+    /* Set-up OSPI serial memory. */
+    result = mtb_serial_memory_setup(&serial_memory_obj, 
+                                MTB_SERIAL_MEMORY_CHIP_SELECT_0, 
+                                CYBSP_SMIF_CORE_0_XSPI_FLASH_hal_config.base,
+                                CYBSP_SMIF_CORE_0_XSPI_FLASH_hal_config.clock,
+                                &smif_mem_context, 
+                                &smif_mem_info,
+                                &smif0BlockConfig);
+#else
+    /* Set-up QSPI serial memory. */
     result = mtb_serial_memory_setup(&serial_memory_obj, 
                                 MTB_SERIAL_MEMORY_CHIP_SELECT_1, 
                                 CYBSP_SMIF_CORE_0_XSPI_FLASH_hal_config.base,
@@ -216,7 +226,7 @@ int main(void)
                                 &smif_mem_context, 
                                 &smif_mem_info,
                                 &smif0BlockConfig);
-
+#endif
     check_status("Serial memory setup failed", result);
 
     /* Use last sector to erase for flash operation */
